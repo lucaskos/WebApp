@@ -7,9 +7,10 @@
 <title>Insert title here</title>
 </head>
 <body>
-<div>
-	<a href="signin.jsp">Login</a>
-	<a href="register.jsp">Register</a>
-</div>
+<form>
+	<input type="text"/><br />
+	<input type="text"/><br />
+	
+</form>
 </body>
 </html>

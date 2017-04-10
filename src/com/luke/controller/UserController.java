@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.luke.dto.UserDao;
+
 /**
  * Servlet implementation class UserController
  */
@@ -27,9 +29,14 @@ public class UserController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String action = request.getParameter("action");
+		String session_name = (String) request.getSession().getAttribute("username");
+		String session_pass = (String) request.getSession().getAttribute("password");
 		if(action.equalsIgnoreCase("delete")) {
-			
-		}
+			boolean deleteUser = new UserDao().deleteUser(session_name, session_pass);
+			if(deleteUser) {
+				response.sendRedirect("index.jsp");
+			}
+		} 
 	}
 
 }

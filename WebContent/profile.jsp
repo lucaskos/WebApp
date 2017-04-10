@@ -8,14 +8,25 @@
 </head>
 <body>
 	<h3>You've been login successfully!</h3>
-	<jsp:useBean id="user" class="com.luke.dto.User" scope="request">
+	<%
+		if(session.getAttribute("username") == null) {
+			response.sendRedirect("index.jsp");
+		}
+	
+	%>
+	<jsp:useBean id="user" class="com.luke.dto.User" scope="session">
 		<jsp:setProperty property="username" name="user" />
 		<jsp:setProperty property="password" name="user" />
 	</jsp:useBean>
 
 	<div>Welcome
 	<jsp:getProperty property="username" name="user" />
-	<!--	<jsp:getProperty property="password" name="user"/>	-->
+	<jsp:getProperty property="password" name="user"/>
+	<jsp:getProperty property="id" name="user"/>
 	</div>
+	
+	<a href="profile_edit.jsp">Edit</a>
+	<a href="UserController?action=delete&username=${user.username}">Delete</a>
+	
 </body>
 </html>

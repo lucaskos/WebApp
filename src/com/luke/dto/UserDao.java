@@ -18,6 +18,7 @@ public class UserDao {
 
 	/*
 	 * Method to check if User of given username and password exists within db
+	 * takes @User as parameter returns boolean TRUE if user exists
 	 */
 	public boolean checkUser(User user) {
 		try {
@@ -73,6 +74,9 @@ public class UserDao {
 
 	}
 
+	/*
+	 * Returns list of all users from Database
+	 */
 	public List<User> getAllUsers() {
 		List<User> userList = new ArrayList<>();
 		try {
@@ -94,4 +98,64 @@ public class UserDao {
 
 	}
 
+	/*
+	 * returns true if user deleted
+	 */
+	public boolean deleteUser(String username, String password) {
+		User user = new User(username, password);
+		try {
+			String deleteString = "delete from users where username=? and password=?";
+			PreparedStatement ps = conn.prepareStatement(deleteString);
+			ps.setString(1, user.getUsername());
+			ps.setString(2, user.getPassword());
+
+			int executeUpdate = ps.executeUpdate();
+			if (executeUpdate != 1) {
+				return false;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try {
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+
+	/*
+	 * Returns given user if
+	 * params @username and @password are correct.
+	 * otherwise returns false
+	 */
+	public User getUserByUsername(String username, String password) {
+		if (checkUser(new User(username, password))) {
+			User user = new User();
+			String getUserByName_String = "selec * from users where username=? and password=?";
+			try {
+				PreparedStatement ps = conn.prepareStatement(getUserByName_String);
+				ps.setString(1, username);
+				ps.setString(2, password);
+				ResultSet rs = ps.executeQuery();
+
+				if (rs.next()) {
+					user.setId(rs.getInt("userid"));
+					user.setPassword(rs.getString("password"));
+					user.setEmail(rs.getString("email"));
+
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+			return user;
+		} else {
+			return null;
+		}
+	}
+
+	public boolean updateUser(User user) {
+
+	}
 }
