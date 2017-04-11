@@ -7,7 +7,10 @@
 <title>Insert title here</title>
 </head>
 <body>
-
+<% if(request.getSession().getAttribute("username") != null){
+	response.sendRedirect("profile.jsp");
+}
+%>
 <form action="LoginServlet" method="post">
 	Username: <input type="text" name="username" required="required"/><br>
 	Password: <input type="password" name="password" required="required" /><br>

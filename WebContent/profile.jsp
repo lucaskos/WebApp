@@ -21,11 +21,9 @@
 
 	<div>Welcome
 	<jsp:getProperty property="username" name="user" />
-	<jsp:getProperty property="password" name="user"/>
-	<jsp:getProperty property="id" name="user"/>
 	</div>
-	
-	<a href="profile_edit.jsp">Edit</a>
+	<a href="UserController?action=logout">Logout</a>
+	<a href="UserController?action=edit&username=${user.username}">Edit</a>
 	<a href="UserController?action=delete&username=${user.username}">Delete</a>
 	
 </body>

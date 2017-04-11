@@ -24,6 +24,7 @@ import com.luke.dto.UserDao;
 @WebServlet({ "/LoginServlet", "/Login" })
 public class LoginServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	protected HttpSession session;
 
 	/**
 	 * @see HttpServlet#HttpServlet()
@@ -39,7 +40,7 @@ public class LoginServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		HttpSession session = request.getSession();
+		session = request.getSession();
 		String username = request.getParameter("username").trim();
 		String password = request.getParameter("password").trim();
 
@@ -52,7 +53,8 @@ public class LoginServlet extends HttpServlet {
 			session.setAttribute("username", username);
 			session.setAttribute("password", password);
 
-			// TODO delete this token after implementing Admin who get all users
+			// TODO delete this token after implementing Admin who get all
+			// users
 			// request.setAttribute("users", new UserDao().getAllUsers());
 
 			RequestDispatcher requestDispatcher = request.getRequestDispatcher("profile.jsp");
@@ -63,12 +65,10 @@ public class LoginServlet extends HttpServlet {
 			response.sendRedirect("signin.jsp");
 			return;
 		}
-
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
-			response.sendRedirect("profile.jsp");
+		response.sendRedirect("profile.jsp");
 	}
 }

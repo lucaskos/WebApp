@@ -16,6 +16,12 @@ public class UserDao {
 		conn = DBConnection.getInstance();
 	}
 
+	private void disconnect() throws SQLException {
+		if (!conn.isClosed() && conn != null) {
+			conn.close();
+		}
+	}
+
 	/*
 	 * Method to check if User of given username and password exists within db
 	 * takes @User as parameter returns boolean TRUE if user exists
@@ -39,6 +45,8 @@ public class UserDao {
 					return true;
 				}
 			}
+			rs.close();
+			disconnect();
 		} catch (Exception e) {
 			System.out.println("error in checkUser() ->	" + e.getMessage());
 		}
@@ -65,7 +73,7 @@ public class UserDao {
 				int executeUpdate = ps.executeUpdate();
 				if (executeUpdate > 0)
 					return true;
-
+				disconnect();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -90,6 +98,8 @@ public class UserDao {
 				user.setEmail(rs.getString("email"));
 				user.setRegistrationDate(rs.getString("register_date"));
 				userList.add(user);
+				rs.close();
+				disconnect();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -113,11 +123,7 @@ public class UserDao {
 			if (executeUpdate != 1) {
 				return false;
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		try {
-			conn.close();
+			disconnect();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -125,14 +131,13 @@ public class UserDao {
 	}
 
 	/*
-	 * Returns given user if
-	 * params @username and @password are correct.
+	 * Returns given user if params @username and @password are correct.
 	 * otherwise returns false
 	 */
 	public User getUserByUsername(String username, String password) {
 		if (checkUser(new User(username, password))) {
 			User user = new User();
-			String getUserByName_String = "selec * from users where username=? and password=?";
+			String getUserByName_String = "select * from users where username=? and password=?";
 			try {
 				PreparedStatement ps = conn.prepareStatement(getUserByName_String);
 				ps.setString(1, username);
@@ -141,21 +146,24 @@ public class UserDao {
 
 				if (rs.next()) {
 					user.setId(rs.getInt("userid"));
+					user.setUsername(rs.getString("username"));
 					user.setPassword(rs.getString("password"));
 					user.setEmail(rs.getString("email"));
-
+					user.setRegistrationDate(rs.getString("register_date"));
 				}
+				rs.close();
+				disconnect();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-
 			return user;
 		} else {
 			return null;
 		}
 	}
 
-	public boolean updateUser(User user) {
-
+	public User updateUser(String username, String password) {
+		User userByUsername = getUserByUsername(username, password);
+		return userByUsername;
 	}
 }
