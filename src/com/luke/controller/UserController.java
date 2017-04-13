@@ -18,13 +18,10 @@ import com.luke.dto.UserDao;
 @WebServlet("/UserController")
 public class UserController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private UserDao userDao;
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
-	public UserController() {
-		super();
-		// TODO Auto-generated constructor stub
+	public void init() {
+		userDao = new UserDao();
 	}
 
 	/**
@@ -34,24 +31,27 @@ public class UserController extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String action = request.getParameter("action");
-		String sessionName = (String) request.getSession().getAttribute("username");
-		String sessionPassword = (String) request.getSession().getAttribute("password");
+		
+		User user = (User) request.getSession().getAttribute("user");
+		String sessionName = user.getUsername();
+		String sessionPassword = user.getPassword();
+		System.out.println(sessionName + " : : " + sessionPassword);
 		if (action.equalsIgnoreCase("delete")) {
-			boolean deleteUser = new UserDao().deleteUser(sessionName, sessionPassword);
+			User userByUsername = userDao.getUserByUsername(sessionName, sessionPassword);
+			boolean deleteUser = userDao.deleteUser(userByUsername);
 			if (deleteUser) {
 				response.sendRedirect("index.jsp");
 			}
 		} else if (action.equalsIgnoreCase("edit")) {
-			User userByUsername = new UserDao().getUserByUsername(sessionName, sessionPassword);
+			User userByUsername = userDao.getUserByUsername(sessionName, sessionPassword);
 			request.setAttribute("user", userByUsername);
 			RequestDispatcher dispatcher = request.getRequestDispatcher("profile_edit.jsp");
 			dispatcher.forward(request, response);
-			
+
 		} else {
-			//Logout in profil page.
-			if (request.getSession().getAttribute("username") != null) {
-				request.getSession().removeAttribute("username");
-				request.getSession().removeAttribute("password");
+			// Logout in profil page.
+			if (request.getSession().getAttribute("user") != null) {
+				request.getSession().removeAttribute("user");
 			}
 			response.sendRedirect("index.jsp");
 		}
@@ -67,6 +67,12 @@ public class UserController extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+		String email = request.getParameter("email");
+		
+		User user = new User(username, password, email);
+		
+		userDao.updateUser(user);
 		System.out.println(username);
 
 	}

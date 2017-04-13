@@ -1,8 +1,6 @@
 package com.luke;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,10 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.websocket.Session;
 
-import com.luke.controller.LoginService;
-import com.luke.dto.DBConnection;
 import com.luke.dto.User;
 import com.luke.dto.UserDao;
 
@@ -44,25 +39,24 @@ public class LoginServlet extends HttpServlet {
 		String username = request.getParameter("username").trim();
 		String password = request.getParameter("password").trim();
 
-		// TODO sprawdzanie czy taki uzytkownik istnieje!
-		// przekierowanie do strony
-		LoginService loginService = new LoginService();
-
-		boolean results = loginService.authenticateUser(username, password);
-		if (results) {
-			session.setAttribute("username", username);
-			session.setAttribute("password", password);
+		
+		
+		boolean result = new UserDao().checkUser(new User(username, password));
+		if (result) {
+			User userByUsername = new UserDao().getUserByUsername(username, password);
+			session.setAttribute("user", userByUsername);
 
 			// TODO delete this token after implementing Admin who get all
 			// users
 			// request.setAttribute("users", new UserDao().getAllUsers());
 
 			RequestDispatcher requestDispatcher = request.getRequestDispatcher("profile.jsp");
-
 			requestDispatcher.forward(request, response);
+			
 			return;
 		} else {
-			response.sendRedirect("signin.jsp");
+			request.setAttribute("message", "Unknown login, please try again");
+			request.getRequestDispatcher("signin.jsp").forward(request, response);
 			return;
 		}
 	}

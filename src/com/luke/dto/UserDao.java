@@ -8,6 +8,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * This DAO Class provides CRUD database operations for the user table in the database.
+ */
 public class UserDao {
 
 	private Connection conn;
@@ -22,19 +25,27 @@ public class UserDao {
 		}
 	}
 
+	private void connect() throws SQLException {
+		if (conn.isClosed() || conn == null) {
+			conn = DBConnection.getInstance();
+		}
+	}
+
 	/*
 	 * Method to check if User of given username and password exists within db
 	 * takes @User as parameter returns boolean TRUE if user exists
 	 */
 	public boolean checkUser(User user) {
+		String username = user.getUsername().trim();
+		String password = user.getPassword().trim();
+		System.err.println(username + " : " + password);
 		try {
-			// Two string of user that is currently checked
-			String username = user.getUsername().trim();
-			String password = user.getPassword().trim();
+			connect();
+			System.out.println("checkUser() -> " + username + " :" + password);
 
 			PreparedStatement ps = conn.prepareStatement("select username, password from users");
 			ResultSet rs = ps.executeQuery();
-			System.err.println(username + " : " + password);
+
 			while (rs.next()) {
 				/*
 				 * Getting username and password for each column in database
@@ -46,7 +57,7 @@ public class UserDao {
 				}
 			}
 			rs.close();
-			disconnect();
+			ps.close();
 		} catch (Exception e) {
 			System.out.println("error in checkUser() ->	" + e.getMessage());
 		}
@@ -59,10 +70,12 @@ public class UserDao {
 	 * @User : user
 	 */
 	public boolean addUser(User user) {
+
 		if (checkUser(user)) {
 			return false;
 		} else {
 			try {
+				connect();
 				String addString = "insert into users(username, password, email, register_date) values (?, ?, ?, ?)";
 				PreparedStatement ps = conn.prepareStatement(addString);
 				ps.setString(1, user.getUsername());
@@ -88,6 +101,7 @@ public class UserDao {
 	public List<User> getAllUsers() {
 		List<User> userList = new ArrayList<>();
 		try {
+			connect();
 			Statement statment = conn.createStatement();
 			ResultSet rs = statment.executeQuery("select * from users");
 			while (rs.next()) {
@@ -111,9 +125,9 @@ public class UserDao {
 	/*
 	 * returns true if user deleted
 	 */
-	public boolean deleteUser(String username, String password) {
-		User user = new User(username, password);
+	public boolean deleteUser(User user) {
 		try {
+			connect();
 			String deleteString = "delete from users where username=? and password=?";
 			PreparedStatement ps = conn.prepareStatement(deleteString);
 			ps.setString(1, user.getUsername());
@@ -135,35 +149,51 @@ public class UserDao {
 	 * otherwise returns false
 	 */
 	public User getUserByUsername(String username, String password) {
-		if (checkUser(new User(username, password))) {
-			User user = new User();
-			String getUserByName_String = "select * from users where username=? and password=?";
-			try {
-				PreparedStatement ps = conn.prepareStatement(getUserByName_String);
-				ps.setString(1, username);
-				ps.setString(2, password);
-				ResultSet rs = ps.executeQuery();
+		User user = new User();
+		String userByUsernameSQL = "select * from users where username=? and password=?";
+		try {
+			connect();
+			PreparedStatement ps = conn.prepareStatement(userByUsernameSQL);
+			ps.setString(1, username);
+			ps.setString(2, password);
+			ResultSet rs = ps.executeQuery();
 
-				if (rs.next()) {
-					user.setId(rs.getInt("userid"));
-					user.setUsername(rs.getString("username"));
-					user.setPassword(rs.getString("password"));
-					user.setEmail(rs.getString("email"));
-					user.setRegistrationDate(rs.getString("register_date"));
-				}
-				rs.close();
-				disconnect();
-			} catch (SQLException e) {
-				e.printStackTrace();
+			if (rs.next()) {
+				user.setId(rs.getInt("userid"));
+				user.setUsername(rs.getString("username"));
+				user.setPassword(rs.getString("password"));
+				user.setEmail(rs.getString("email"));
+				user.setRegistrationDate(rs.getString("register_date"));
 			}
-			return user;
-		} else {
-			return null;
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
+		return user;
 	}
 
-	public User updateUser(String username, String password) {
-		User userByUsername = getUserByUsername(username, password);
-		return userByUsername;
+	public boolean updateUser(User user) {
+		String updateSQL = "update users set password=?, email=? where username=?";
+
+		try {
+			connect();
+			PreparedStatement ps = conn.prepareStatement(updateSQL);
+
+			ps.setString(1, user.getPassword());
+			ps.setString(2, user.getEmail());
+			ps.setString(3, user.getUsername());
+
+			int rowUpdated = ps.executeUpdate();
+			if (rowUpdated > 0)
+				return true;
+			ps.close();
+			disconnect();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return false;
 	}
 }
