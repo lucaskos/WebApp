@@ -14,7 +14,7 @@
 	</div>
 	<a href="UserController?action=logout">Logout</a>
 	<a href="UserController?action=edit&username=${user.username}">Edit</a>
-	<a href="UserController?action=delete&username=${user.username}">Delete</a>
+	<a href="UserController?action=delete">Delete</a>
 
 </body>
 </html>

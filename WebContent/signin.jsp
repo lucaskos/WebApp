@@ -17,7 +17,7 @@
 	<p>
 		<c:out value="${message}"></c:out>
 	</p>
-	<form action="LoginServlet" method="post">
+	<form action="UserController?action=login" method="post">
 		Username: <input type="text" name="username" required="required" /><br>
 		Password: <input type="password" name="password" required="required" /><br>
 		<input type="submit" value="Signin" />

@@ -5,7 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /*
@@ -38,10 +41,8 @@ public class UserDao {
 	public boolean checkUser(User user) {
 		String username = user.getUsername().trim();
 		String password = user.getPassword().trim();
-		System.err.println(username + " : " + password);
 		try {
 			connect();
-			System.out.println("checkUser() -> " + username + " :" + password);
 
 			PreparedStatement ps = conn.prepareStatement("select username, password from users");
 			ResultSet rs = ps.executeQuery();
@@ -59,7 +60,7 @@ public class UserDao {
 			rs.close();
 			ps.close();
 		} catch (Exception e) {
-			System.out.println("error in checkUser() ->	" + e.getMessage());
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -70,7 +71,6 @@ public class UserDao {
 	 * @User : user
 	 */
 	public boolean addUser(User user) {
-
 		if (checkUser(user)) {
 			return false;
 		} else {
@@ -78,10 +78,12 @@ public class UserDao {
 				connect();
 				String addString = "insert into users(username, password, email, register_date) values (?, ?, ?, ?)";
 				PreparedStatement ps = conn.prepareStatement(addString);
+				DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+				String registrationDate = df.format(Calendar.getInstance().getTime());
 				ps.setString(1, user.getUsername());
 				ps.setString(2, user.getPassword());
 				ps.setString(3, user.getEmail());
-				ps.setString(4, user.getRegistrationDate());
+				ps.setString(4, registrationDate);
 
 				int executeUpdate = ps.executeUpdate();
 				if (executeUpdate > 0)
@@ -92,7 +94,6 @@ public class UserDao {
 			}
 		}
 		return true;
-
 	}
 
 	/*
@@ -190,10 +191,8 @@ public class UserDao {
 			ps.close();
 			disconnect();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 		return false;
 	}
 }

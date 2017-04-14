@@ -33,16 +33,14 @@ public class UserController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		
 		String action = request.getParameter("action");
-
-		session = request.getSession();
-		User user = (User) session.getAttribute("user");
-
-		if (user == null) {
-			RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
-			dispatcher.forward(request, response);
+		if(action == null) {
+			request.getRequestDispatcher("index.jsp").forward(request, response);
 		}
 
+		session = request.getSession();
+		
 		try {
 			switch (action) {
 			case "login":
@@ -51,7 +49,7 @@ public class UserController extends HttpServlet {
 			case "edit":
 				showEditPage(request, response);
 				break;
-			case "delte":
+			case "delete":
 				showDeletePage(request, response);
 				break;
 			case "logout":
@@ -61,7 +59,7 @@ public class UserController extends HttpServlet {
 				showRegisterPage(request, response);
 				break;
 			case "insert":
-				intertUser(request, response);
+				insertUser(request, response);
 				break;
 			}
 		} catch (Exception e) {
@@ -71,9 +69,22 @@ public class UserController extends HttpServlet {
 
 	private void showRegisterPage(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		request.setAttribute("message", "You already logged into an account.\nPlease logout first.");
-		RequestDispatcher dispatcher = request.getRequestDispatcher("form.jsp");
-		dispatcher.forward(request, response);
+		String username = request.getParameter("username");
+		String password = request.getParameter("password");
+		String email = request.getParameter("email");
+
+		User user = new User(username, password, email);
+		// if accoutn already exists!
+		if (userDao.checkUser(user) != false) {
+			request.setAttribute("message", "Account already exists!");
+			RequestDispatcher dispatcher = request.getRequestDispatcher("form.jsp");
+			dispatcher.forward(request, response);
+		} else {
+			session.setAttribute("user", user);
+			userDao.addUser(user);
+			RequestDispatcher dispatcher = request.getRequestDispatcher("profile.jsp");
+			dispatcher.forward(request, response);
+		}
 	}
 
 	private void showLogoutPage(HttpServletRequest request, HttpServletResponse response)
@@ -81,7 +92,7 @@ public class UserController extends HttpServlet {
 		// Logout from profil page.
 
 		if (request.getSession().getAttribute("user") != null
-				|| request.getSession().getAttribute("username").equals("")) {
+				|| !request.getSession().getAttribute("user").equals("")) {
 			session.invalidate();
 		}
 		RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
@@ -100,15 +111,12 @@ public class UserController extends HttpServlet {
 
 	private void showEditPage(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		System.out.println("show edit page");
-
 		RequestDispatcher dispatcher = request.getRequestDispatcher("form.jsp");
 		dispatcher.forward(request, response);
 	}
 
-	private void intertUser(HttpServletRequest request, HttpServletResponse response)
+	private void insertUser(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		System.out.println("insert user");
 		User sessionUser = (User) request.getSession().getAttribute("user");
 		request.setAttribute("user", sessionUser);
 
@@ -116,14 +124,15 @@ public class UserController extends HttpServlet {
 		String passwordConfirmed = request.getParameter("password-confirm");
 		String email = request.getParameter("email");
 
+		//password mismatch
 		if (!password.equals(passwordConfirmed)) {
-			System.out.println("passwords not correct");
 			request.setAttribute("message", "Both passwords fields must be the same!");
 			RequestDispatcher dispatcher = request.getRequestDispatcher("form.jsp");
 			dispatcher.forward(request, response);
 		} else {
 			User updatedUser = new User(sessionUser.getUsername(), password, email);
-			userDao.addUser(updatedUser);
+			userDao.updateUser(updatedUser);
+			session.setAttribute("user", updatedUser);
 			RequestDispatcher dispatcher = request.getRequestDispatcher("profile.jsp");
 			dispatcher.forward(request, response);
 		}
@@ -164,16 +173,6 @@ public class UserController extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// String username = request.getParameter("username");
-		// String password = request.getParameter("password");
-		// String email = request.getParameter("email");
-		//
-		// User user = new User(username, password, email);
-		//
-		// userDao.updateUser(user);
-		// RequestDispatcher dispatcher =
-		// request.getRequestDispatcher("profile.jsp");
-		// dispatcher.forward(request, response);
 		doGet(request, response);
 	}
 
