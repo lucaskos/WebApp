@@ -30,12 +30,20 @@ public class UserController extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		System.out.println("Session attribute : " + request.getSession().getAttribute("user"));
 		String action = request.getParameter("action");
-		
+
 		User user = (User) request.getSession().getAttribute("user");
+		
+		if(user == null) {
+			RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
+			dispatcher.forward(request, response);
+			response.sendRedirect("index.jsp");
+		}
+		
 		String sessionName = user.getUsername();
 		String sessionPassword = user.getPassword();
-		System.out.println(sessionName + " : : " + sessionPassword);
+		
 		if (action.equalsIgnoreCase("delete")) {
 			User userByUsername = userDao.getUserByUsername(sessionName, sessionPassword);
 			boolean deleteUser = userDao.deleteUser(userByUsername);
@@ -48,11 +56,14 @@ public class UserController extends HttpServlet {
 			RequestDispatcher dispatcher = request.getRequestDispatcher("profile_edit.jsp");
 			dispatcher.forward(request, response);
 
-		} else {
-			// Logout in profil page.
-			if (request.getSession().getAttribute("user") != null) {
+		} else if(action.equalsIgnoreCase("logout")) {
+			// Logout from profil page.
+			
+			if (request.getSession().getAttribute("user") != null || request.getSession().getAttribute("username").equals("")) {
 				request.getSession().removeAttribute("user");
 			}
+			RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
+			dispatcher.forward(request, response);
 			response.sendRedirect("index.jsp");
 		}
 	}
@@ -69,12 +80,12 @@ public class UserController extends HttpServlet {
 		String username = request.getParameter("username");
 		String password = request.getParameter("password");
 		String email = request.getParameter("email");
-		
-		User user = new User(username, password, email);
-		
-		userDao.updateUser(user);
-		System.out.println(username);
 
+		User user = new User(username, password, email);
+
+		userDao.updateUser(user);
+		RequestDispatcher dispatcher = request.getRequestDispatcher("profile.jsp");
+		dispatcher.forward(request, response);
 	}
 
 }

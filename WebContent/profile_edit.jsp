@@ -8,9 +8,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Insert title here</title>
 </head>
-<%=request.getAttribute("user")%>
-<%=session.getAttribute("user") %>
-<body>
+	<body>
 	<form method="POST" action='UserController' name="user">
 		<p>
 			Username : <input type="text" readonly="readonly" name="username"

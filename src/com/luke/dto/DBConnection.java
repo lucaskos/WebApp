@@ -23,7 +23,7 @@ public class DBConnection {
 		try {
 			con.close();
 		} catch (Exception ex) {
-			// TODO Logg exception
+			ex.printStackTrace();
 		}
 	}
 

@@ -9,16 +9,6 @@
 </head>
 <body>
 	<h3>You've been login successfully!</h3>
-	<%
-		if (session.getAttribute("user") == null) {
-			response.sendRedirect("index.jsp");
-		}
-	%>
-	<jsp:useBean id="user" class="com.luke.dto.User" scope="session">
-		<jsp:setProperty property="username" name="user" />
-		
-	</jsp:useBean>
-
 	<div>
 		Welcome, <c:out value="${user.username }" />
 	</div>
